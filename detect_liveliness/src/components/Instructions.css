@@ -11,7 +11,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 0.5rem 1.5rem;
     border-radius: 20px;
-    color: #fff;
+    color: #8e24c2;
     cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.3s ease;
@@ -50,7 +50,7 @@
 
 .instructions-content h3 {
     margin-bottom: 1.5rem;
-    color: #fff;
+    color: #d23737;
     text-align: center;
     font-weight: 500;
 }
@@ -98,7 +98,7 @@
 
 .guideline li {
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(20, 195, 46, 0.8);
     margin-bottom: 0.4rem;
     padding-left: 0.5rem;
     border-left: 2px solid rgba(100, 108, 255, 0.3);

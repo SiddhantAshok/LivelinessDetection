@@ -11,7 +11,7 @@ const Instructions = () => {
                 className="instructions-toggle"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                {isExpanded ? 'Hide' : 'Show'} Instructions
+                {isExpanded ? 'Hide' : 'Show More'} Instructions
             </button>
 
             {isExpanded && (
