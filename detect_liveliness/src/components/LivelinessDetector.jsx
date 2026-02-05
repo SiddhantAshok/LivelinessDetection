@@ -37,10 +37,13 @@ const LivelinessDetector = ({ currentStep, onStepComplete, canvasRef: parentCanv
     useEffect(() => {
         const initializeDetectors = async () => {
             try {
+                console.log('Starting MediaPipe initialization...');
                 const vision = await FilesetResolver.forVisionTasks(
                     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
                 );
+                console.log('Vision tasks loaded');
 
+                console.log('Loading Face Landmarker...');
                 faceLandmarkerRef.current = await FaceLandmarker.createFromOptions(vision, {
                     baseOptions: {
                         modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
@@ -51,7 +54,9 @@ const LivelinessDetector = ({ currentStep, onStepComplete, canvasRef: parentCanv
                     runningMode: "VIDEO",
                     numFaces: 1
                 });
+                console.log('Face Landmarker loaded');
 
+                console.log('Loading Hand Landmarker...');
                 handLandmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
                     baseOptions: {
                         modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
@@ -60,11 +65,13 @@ const LivelinessDetector = ({ currentStep, onStepComplete, canvasRef: parentCanv
                     runningMode: "VIDEO",
                     numHands: 2
                 });
+                console.log('Hand Landmarker loaded');
 
                 setIsLoading(false);
+                console.log('Initialization complete');
             } catch (err) {
-                setError('Failed to initialize detection models. Please check your camera permissions.');
-                console.error(err);
+                console.error('Detailed error:', err);
+                setError('Failed to initialize detection models: ' + (err.message || 'Unknown error') + '. Please refresh the page and check your internet connection.');
             }
         };
 

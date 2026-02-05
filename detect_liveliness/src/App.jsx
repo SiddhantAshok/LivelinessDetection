@@ -4,7 +4,7 @@ import './App.css';
 import LivelinessDetector from './components/LivelinessDetector';
 import Instructions from './components/Instructions';
 import ProgressIndicator from './components/ProgressIndicator';
-import { detectObjects } from './api/detectionCall';
+import { detectObjects, checkApiHealth } from './api/detectionCall';
 
 function App() {
   const [isStarted, setIsStarted] = useState(false);
@@ -23,6 +23,14 @@ function App() {
   });
   const canvasRef = useRef(null);
   const periodicDetectionIntervalRef = useRef(null);
+  const consecutiveDetectionsRef = useRef(0);
+
+  // Warm up the API server on app initialization
+  useEffect(() => {
+    checkApiHealth().catch(err => {
+      console.warn('API health check failed during initialization:', err);
+    });
+  }, []);
 
   const detectionSteps = [
     { id: 1, name: 'Smile', description: 'Show a natural smile' },
@@ -35,7 +43,7 @@ function App() {
     { id: 8, name: 'Nod Head', description: 'Nod your head up and down' },
   ];
 
-  // Periodic detection every 5 seconds while verification is running
+  // Periodic detection every 4 seconds while verification is running
   useEffect(() => {
     if (isStarted && !maskDetected) {
       periodicDetectionIntervalRef.current = setInterval(async () => {
@@ -46,21 +54,30 @@ function App() {
               const detectionResult = await detectObjects(imageBase64, 'image/jpeg');
               console.log('Periodic detection result:', detectionResult);
 
-              // Check if facemask is detected
+              // Check if facemask is detected - require 2 consecutive true detections
               if (detectionResult === true) {
-                setMaskDetected(true);
-                setIsStarted(false);
-                // Clear the interval
-                if (periodicDetectionIntervalRef.current) {
-                  clearInterval(periodicDetectionIntervalRef.current);
+                consecutiveDetectionsRef.current += 1;
+                console.log('Consecutive detections:', consecutiveDetectionsRef.current);
+                
+                if (consecutiveDetectionsRef.current >= 2) {
+                  setMaskDetected(true);
+                  setIsStarted(false);
+                  consecutiveDetectionsRef.current = 0;
+                  // Clear the interval
+                  if (periodicDetectionIntervalRef.current) {
+                    clearInterval(periodicDetectionIntervalRef.current);
+                  }
                 }
+              } else {
+                // Reset counter if detection is false
+                consecutiveDetectionsRef.current = 0;
               }
             }
           } catch (err) {
             console.error('Error during periodic detection:', err);
           }
         }
-      }, 5000); // Call every 5 seconds
+      }, 4000); // Call every 4 seconds
 
       return () => {
         if (periodicDetectionIntervalRef.current) {
