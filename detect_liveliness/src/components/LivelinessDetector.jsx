@@ -4,7 +4,7 @@ import Webcam from 'react-webcam';
 import { FaceLandmarker, HandLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision';
 import './LivelinessDetector.css';
 
-const LivelinessDetector = ({ currentStep, onStepComplete, canvasRef: parentCanvasRef }) => {
+const LivelinessDetector = ({ currentStep, onStepComplete, canvasRef: parentCanvasRef, faceLandmarksRef }) => {
     const webcamRef = useRef(null);
     const localCanvasRef = useRef(null);
     const canvasRef = parentCanvasRef || localCanvasRef;
@@ -425,6 +425,11 @@ const LivelinessDetector = ({ currentStep, onStepComplete, canvasRef: parentCanv
 
         // Draw face landmarks
         if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+            // Update faceLandmarks ref for parent component to use for cropping
+            if (faceLandmarksRef) {
+                faceLandmarksRef.current = results.faceLandmarks[0];
+            }
+
             for (const landmarks of results.faceLandmarks) {
                 // Only draw face mesh if showFaceMesh is true
                 if (showFaceMesh) {

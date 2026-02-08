@@ -4,7 +4,7 @@ import './App.css';
 import LivelinessDetector from './components/LivelinessDetector';
 import Instructions from './components/Instructions';
 import ProgressIndicator from './components/ProgressIndicator';
-import { detectObjects, checkApiHealth } from './api/detectionCall';
+import { detectObjects, checkApiHealth, cropImageToFace } from './api/detectionCall';
 
 function App() {
   const [isStarted, setIsStarted] = useState(false);
@@ -22,6 +22,7 @@ function App() {
     8: true,
   });
   const canvasRef = useRef(null);
+  const faceLandmarksRef = useRef(null);
   const periodicDetectionIntervalRef = useRef(null);
   const consecutiveDetectionsRef = useRef(0);
 
@@ -49,7 +50,15 @@ function App() {
       periodicDetectionIntervalRef.current = setInterval(async () => {
         if (canvasRef.current) {
           try {
-            const imageBase64 = canvasRef.current.toDataURL('image/jpeg').split(',')[1];
+            let imageBase64;
+            if (faceLandmarksRef.current && faceLandmarksRef.current.length > 0) {
+              // Use cropped image focused on face
+              const croppedImageUrl = cropImageToFace(canvasRef.current, faceLandmarksRef.current);
+              imageBase64 = croppedImageUrl.split(',')[1];
+            } else {
+              // Fall back to full image if no face landmarks
+              imageBase64 = canvasRef.current.toDataURL('image/jpeg').split(',')[1];
+            }
             if (imageBase64) {
               const detectionResult = await detectObjects(imageBase64, 'image/jpeg');
               console.log('Periodic detection result:', detectionResult);
@@ -207,6 +216,7 @@ function App() {
                     currentStep={activeDetectionSteps[currentStep]}
                     onStepComplete={handleStepComplete}
                     canvasRef={canvasRef}
+                    faceLandmarksRef={faceLandmarksRef}
                   />
                 </>
               ) : (
